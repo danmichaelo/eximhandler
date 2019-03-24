@@ -4,7 +4,7 @@
 from distutils.core import setup
 
 setup(name='EximHandler',
-      version='1.0',
+      version='1.1',
       description='A logging handler class which sends an email using exim',
       author='Dan Michael O. Heggø',
       author_email='danmichaelo@gmail.com',
