@@ -1,1 +1,1 @@
-from eximhandler import EximHandler
+from .eximhandler import EximHandler
