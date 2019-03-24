@@ -15,7 +15,7 @@ class EximHandler(logging.Handler):
         self.subject = subject
         self.exim_path = exim_path
 
-    def getSubject(self, record):
+    def get_subject(self, record):
         """
         Determine the subject for the email.
 
@@ -30,10 +30,11 @@ class EximHandler(logging.Handler):
 
         Format the record and send it to the specified address.
         """
+        subject = self.get_subject(record)
         body = self.format(record)
         try:
             proc1 = Popen(
-                ['echo', '-e', 'Subject: %s\n\n%s' % (self.subject, body)],
+                ['echo', '-e', 'Subject: %s\n\n%s' % (subject, body)],
                 stdout=PIPE
             )
 
