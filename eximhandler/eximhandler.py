@@ -1,4 +1,5 @@
 import logging
+from subprocess import Popen, PIPE
 
 
 class EximHandler(logging.Handler):
@@ -27,19 +28,28 @@ class EximHandler(logging.Handler):
         """
         Emit a record.
 
-        Format the record and send it to the specified addressees.
+        Format the record and send it to the specified address.
         """
+        body = self.format(record)
         try:
-            from subprocess import Popen, PIPE
+            proc1 = Popen(
+                ['echo', '-e', 'Subject: %s\n\n%s' % (self.subject, body)],
+                stdout=PIPE
+            )
 
-            msg = self.format(record)
+            proc2 = Popen(
+                [self.exim_path, '-odf', '-i', self.toaddr],
+                stdin=proc1.stdout, stdout=PIPE
+            )
 
-            p1 = Popen(["echo", "-e", "Subject: " + self.subject + "\n\n" + msg], stdout=PIPE)
-            p2 = Popen([self.exim_path, "-odf", "-i", self.toaddr], stdin=p1.stdout, stdout=PIPE)
-            p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-            output = p2.communicate()[0]
+            # Allow proc1 to receive a SIGPIPE if proc2 exits.
+            proc1.stdout.close()
+
+            # Wait for proc2 to exit
+            proc2.communicate()
 
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+
+        except Exception:
             self.handleError(record)
